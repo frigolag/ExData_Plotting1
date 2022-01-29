@@ -18,34 +18,43 @@ if (file.exists(!file)){
 ## read data from file
 df<-read_delim("household_power_consumption.txt",
                delim=";",col_types = cols_only(Date =col_character(),
-                                               Time=col_character(), 
+                                               Time=col_character(),
+                                               Global_active_power=col_double(),
+                                               Global_reactive_power=col_double(),
+                                               Voltage=col_double(),
                                                Sub_metering_1=col_double(),
                                                Sub_metering_2=col_double(),
-                                               Sub_metering_3=col_double(),
-                                               Global_active_power=col_double()))
+                                               Sub_metering_3=col_double()))
+
 ## extract data from 2007-02-01 & 2007-02-02
 df<-df%>% filter(Date=="1/2/2007"| Date=="2/2/2007")%>%
   unite(Date_Time,Date,Time,sep = " ")
 df$Date_Time<-as.POSIXct(df$Date_Time,tz="",format= "%d/%m/%Y %H:%M:%S")
 
 ## Plot
-## Set parameters
-par(mfcol=c(2,2),mar=c(2,5,3,3))
-
 ## open device 
-##png(filename = "plot4.png")
+png(filename = "plot4.png")
+
+## Set parameters
+par(mfcol=c(2,2),mar=c(5,5,3,3))
 
 ## plot graphic 1
-with(df,plot(Date_Time,Global_active_power,ylab = "Global Active Power (kilowatts)",
+with(df,plot(Date_Time,Global_active_power,ylab = "Global Active Power",
               type="l",xlab=""))
 
 ## plot graphic 2
-matplot(df$Date_Time,df[,3:5],ylab = "Energy sub metering",
+matplot(df$Date_Time,df[,5:7],ylab = "Energy sub metering",
         lty = c(1,1,1),type=c("S","S","S"),col = c("black","red","blue"),xlab="")
 
 text =  c("Sub_metering_1","Sub_metering_2","Sub_metering_3")
 legend("topright",legend = text,col=c("black","red","blue"),
-       lty=1)
+       lty=1,bty = "n",cex = 0.8)
+
+## plot graphic 3
+with(df,plot(Date_Time,Voltage,type="l",xlab="datetime"))
+
+## plot graphic 4
+with(df,plot(Date_Time,Global_reactive_power,type="l",xlab="datetime"))
 
 ## close device
-##dev.off()
+dev.off()
